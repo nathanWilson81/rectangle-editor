@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 
 import "./App.css"
 
@@ -53,8 +53,9 @@ const canvasWidth = window.innerWidth * 0.8
 
 function App() {
   const [dragStart, setDragStart] = useState(null)
+  const [dragging, setDragging] = useState(false)
   const [managedRectangles, setManagedRectangles] = useState(rectanglesOnMount)
-  console.log(managedRectangles)
+  const rectangleBeingDrawn = useRef(null)
 
   const drawRectangle = useCallback(({ x, y, width, height, color }) => {
     const ctx = getCanvasContext()
@@ -81,7 +82,6 @@ function App() {
       x,
       y
     )
-    console.log(isWithinExistingRect)
     if (isWithinExistingRect.length > 0) {
       clearCanvas()
       setManagedRectangles(
@@ -89,24 +89,33 @@ function App() {
       )
     }
     setDragStart({ x, y })
+    setDragging(true)
   }
 
   const onMouseUp = (e) => {
-    // Handle drawing upwards as well
-    const {
-      canvasWidth,
-      canvasHeight,
-      x: canvasX,
-      y: canvasY,
-    } = getCanvasSize()
-    const x = e.clientX - canvasX
-    const y = e.clientY - canvasY
-    const width = Math.abs(dragStart.x - x) / canvasWidth
-    const height = Math.abs(dragStart.y - y) / canvasHeight
-    const color = "red"
-    const rectangle = { x: dragStart.x, y: dragStart.y, width, height, color }
-    if (width > 0 && height > 0) {
-      setManagedRectangles([...managedRectangles, rectangle])
+    setDragging(false)
+    setManagedRectangles([...managedRectangles, {...rectangleBeingDrawn.current}])
+    rectangleBeingDrawn.current = null
+  }
+
+  const onMouseMove = (e) => {
+    if (dragging) {
+      const {
+        canvasWidth,
+        canvasHeight,
+        x: canvasX,
+        y: canvasY,
+      } = getCanvasSize()
+      const x = e.clientX - canvasX
+      const y = e.clientY - canvasY
+      const width = Math.abs(dragStart.x - x) / canvasWidth
+      const height = Math.abs(dragStart.y - y) / canvasHeight
+      const color = "red"
+      const rectangle = { x: dragStart.x, y: dragStart.y, width, height, color }
+      if (width > 0 && height > 0) {
+        drawRectangle(rectangle)
+        rectangleBeingDrawn.current = rectangle
+      }
     }
   }
 
@@ -133,6 +142,7 @@ function App() {
         width={canvasWidth}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
         id={canvasId}
       />
     </div>
