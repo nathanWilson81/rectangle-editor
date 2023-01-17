@@ -55,6 +55,8 @@ function App() {
   const [dragStart, setDragStart] = useState(null)
   const [dragging, setDragging] = useState(false)
   const [managedRectangles, setManagedRectangles] = useState(rectanglesOnMount)
+  const [moving, setMoving] = useState(false)
+  const [currentRect, setCurrentRect] = useState(null)
   const rectangleBeingDrawn = useRef(null)
 
   const drawRectangle = useCallback(({ x, y, width, height, color }) => {
@@ -86,18 +88,21 @@ function App() {
       x,
       y
     )
+    setDragStart({ x, y })
     if (isWithinExistingRect.length > 0) {
-      clearCanvas()
+      setMoving(true)
       setManagedRectangles(
         managedRectangles.filter((rect) => rect !== isWithinExistingRect[0])
       )
+      setCurrentRect(isWithinExistingRect[0])
+    } else {
+      setDragging(true)
     }
-    setDragStart({ x, y })
-    setDragging(true)
   }
 
   const onMouseUp = () => {
     setDragging(false)
+    setMoving(false)
     setManagedRectangles([
       ...managedRectangles,
       { ...rectangleBeingDrawn.current },
@@ -106,6 +111,20 @@ function App() {
   }
 
   const onMouseMove = (e) => {
+    if (moving) {
+      const {
+        x: canvasX,
+        y: canvasY,
+      } = getCanvasSize()
+      const x = (e.clientX - canvasX) - dragStart.x
+      const y = e.clientY - canvasY - dragStart.y
+      const { width, height, color } = currentRect
+      const rectangle = { x: dragStart.x + x, y: dragStart.y + y, width, height, color }
+      clearCanvas()
+      drawRectangles()
+      drawRectangle(rectangle)
+      rectangleBeingDrawn.current = rectangle
+    }
     if (dragging) {
       const {
         canvasWidth,
