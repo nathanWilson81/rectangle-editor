@@ -149,12 +149,9 @@ function App() {
         style={{ border: "1px solid black" }}
         height={canvasHeight}
         width={canvasWidth}
-        onTouchStart={onMouseDown}
-        onTouchMove={onMouseMove}
-        onTouchEnd={onMouseUp}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
+        onPointerDown={onMouseDown}
+        onPointerUp={onMouseUp}
+        onPointerMove={onMouseMove}
         id={canvasId}
       />
     </div>
