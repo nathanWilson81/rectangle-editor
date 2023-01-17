@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 import "./App.css"
 
@@ -13,14 +13,27 @@ const getCanvasContext = () => {
   return canvas.getContext("2d")
 }
 
+const getCanvasSize = () => {
+  const {
+    width: canvasWidth,
+    height: canvasHeight,
+    x,
+    y,
+  } = document.getElementById(canvasId).getBoundingClientRect()
+  return { canvasWidth, canvasHeight, x, y }
+}
+
 const setupCanvas = () => {
   const ctx = getCanvasContext()
   ctx.scale(1, 1)
 }
+
 const drawRectangle = ({ x, y, width, height, color }) => {
+  console.log("drawing", { x, y })
   const ctx = getCanvasContext()
-  const actualWidth = ctx.canvas.clientWidth * width
-  const actualHeight = ctx.canvas.clientHeight * height
+  const { canvasWidth, canvasHeight } = getCanvasSize()
+  const actualWidth = canvasWidth * width
+  const actualHeight = canvasHeight * height
   ctx.beginPath()
   ctx.fillStyle = color
   ctx.rect(x, y, actualWidth, actualHeight)
@@ -37,6 +50,31 @@ function App() {
     rectanglesOnMount.map(drawRectangle)
   }, [])
 
+  const [dragStart, setDragStart] = useState(null)
+
+  const onMouseDown = (e) => {
+    const { x: canvasX, y: canvasY } = getCanvasSize()
+    const x = e.clientX - canvasX
+    const y = e.clientY - canvasY
+    setDragStart({ x, y })
+  }
+
+  const onMouseUp = (e) => {
+    // Handle drawing upwards as well
+    const {
+      canvasWidth,
+      canvasHeight,
+      x: canvasX,
+      y: canvasY,
+    } = getCanvasSize()
+    const x = e.clientX - canvasX
+    const y = e.clientY - canvasY
+    const width = Math.abs(dragStart.x - x) / canvasWidth
+    const height = Math.abs(dragStart.y - y) / canvasHeight
+    const color = "red"
+    drawRectangle({ x: dragStart.x, y: dragStart.y, width, height, color })
+  }
+
   return (
     <div
       style={{
@@ -52,6 +90,8 @@ function App() {
         style={{ border: "1px solid black" }}
         height={canvasHeight}
         width={canvasWidth}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
         id={canvasId}
       />
     </div>
