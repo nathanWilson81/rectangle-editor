@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import "./App.css"
 
 const canvasId = "rectangle-editor"
+const canvasHeight = window.innerHeight * 0.8
+const canvasWidth = window.innerWidth * 0.8
 
 const rectanglesOnMount = [
   { x: 5, y: 5, width: 0.3, height: 0.2, color: "red" },
@@ -48,8 +50,6 @@ const isMouseWithinExistingRect = (rects, mouseX, mouseY) => {
   return rects.filter(isWithinRect)
 }
 
-const canvasHeight = window.innerHeight * 0.8
-const canvasWidth = window.innerWidth * 0.8
 
 function App() {
   const [dragStart, setDragStart] = useState(null)
@@ -67,6 +67,10 @@ function App() {
     ctx.rect(x, y, actualWidth, actualHeight)
     ctx.fill()
   }, [])
+
+  const drawRectangles = () => {
+    managedRectangles.map(drawRectangle)
+  }
 
   const clearCanvas = useCallback(() => {
     const ctx = getCanvasContext()
@@ -92,7 +96,7 @@ function App() {
     setDragging(true)
   }
 
-  const onMouseUp = (e) => {
+  const onMouseUp = () => {
     setDragging(false)
     setManagedRectangles([
       ...managedRectangles,
@@ -116,6 +120,8 @@ function App() {
       const color = "red"
       const rectangle = { x: dragStart.x, y: dragStart.y, width, height, color }
       if (width > 0 && height > 0) {
+        clearCanvas()
+        drawRectangles()
         drawRectangle(rectangle)
         rectangleBeingDrawn.current = rectangle
       }
@@ -143,6 +149,9 @@ function App() {
         style={{ border: "1px solid black" }}
         height={canvasHeight}
         width={canvasWidth}
+        onTouchStart={onMouseDown}
+        onTouchMove={onMouseMove}
+        onTouchEnd={onMouseUp}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
