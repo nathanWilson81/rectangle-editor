@@ -91,6 +91,7 @@ export const LayoutModal = ({
         alignItems: "center",
         justifyContent: "center",
       }}
+      onClick={() => setLayoutModalOpen(false)}
     >
       <div
         style={{
@@ -100,6 +101,7 @@ export const LayoutModal = ({
           borderRadius: "1rem",
           textAlign: "center",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <h1>Layout Management</h1>
         <div style={{ display: "flex", flexDirection: "column" }}>

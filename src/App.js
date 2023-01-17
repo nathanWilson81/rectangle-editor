@@ -3,13 +3,15 @@ import "./App.css"
 import { useEffect, useState, useCallback, useRef } from "react"
 
 import { Trash2, XCircle, Archive } from "feather-icons-react"
+import { v4 as uuid } from "uuid"
+import {
+  isMouseWithinExistingRect,
+  getCanvasSize,
+  canvasId,
+  isMouseCloseToEdges,
+} from "./utils"
+
 import LayoutModal from "./LayoutModal"
-
-const canvasId = "rectangle-editor"
-
-const rectanglesOnMount = [
-  { x: 5, y: 5, width: 0.3, height: 0.2, color: "#ff0000", current: false },
-]
 
 const getCanvasContext = () => {
   const canvas = document.getElementById(canvasId)
@@ -24,9 +26,10 @@ const setupCanvas = () => {
 function App() {
   const [dragStart, setDragStart] = useState(null)
   const [dragging, setDragging] = useState(false)
-  const [managedRectangles, setManagedRectangles] = useState(rectanglesOnMount)
   const [moving, setMoving] = useState(false)
+  const [resizing, setResizing] = useState(false)
   const [layoutModalOpen, setLayoutModalOpen] = useState(false)
+  const [managedRectangles, setManagedRectangles] = useState([])
   const [currentRect, setCurrentRect] = useState(null)
   const [canvasHeight, setCanvasHeight] = useState(window.innerHeight * 0.8)
   const [canvasWidth, setCanvasWidth] = useState(window.innerWidth * 0.8)
@@ -35,54 +38,22 @@ function App() {
   const resizeRef = useRef(null)
   const renderRef = useRef(null)
 
-  const getCanvasSize = () => {
-    const { x, y } = document.getElementById(canvasId).getBoundingClientRect()
-    return { x, y }
-  }
-
-  const convertRectToTrueDiminsions = useCallback(
-    (rect) => {
-      const { x, y, width, height } = rect
-      const actualWidth = canvasWidth * width
-      const actualHeight = canvasHeight * height
-      return { x, y, width: actualWidth, height: actualHeight }
-    },
-    [canvasWidth, canvasHeight]
-  )
-
-  const isMouseWithinExistingRect = useCallback(
-    (rects, mouseX, mouseY) => {
-      const isWithinRect = (rect) => {
-        const { x, y, width, height } = convertRectToTrueDiminsions(rect)
-        const xLimit = x + width
-        const yLimit = y + height
-        const withinX = mouseX > x && mouseX < xLimit
-        const withinY = mouseY > y && mouseY < yLimit
-        return withinX && withinY ? rect : false
-      }
-      return rects.filter(isWithinRect)
-    },
-    [convertRectToTrueDiminsions]
-  )
-
   const drawRectangle = useCallback(
     ({ x, y, width, height, color, current }) => {
       const ctx = getCanvasContext()
-      const actualWidth = canvasWidth * width
-      const actualHeight = canvasHeight * height
       ctx.beginPath()
       ctx.fillStyle = color
-      ctx.rect(x, y, actualWidth, actualHeight)
+      ctx.rect(x, y, width, height)
       ctx.fill()
       if (current || currentRect?.x === x) {
         ctx.beginPath()
         ctx.lineWidth = "2"
         ctx.strokeStyle = "green"
-        ctx.rect(x, y, actualWidth, actualHeight)
+        ctx.rect(x, y, width, height)
         ctx.stroke()
       }
     },
-    [canvasWidth, canvasHeight, currentRect]
+    [currentRect]
   )
 
   const drawRectangles = useCallback(() => {
@@ -104,8 +75,12 @@ function App() {
       x,
       y
     )
+    const isCloseToEdges = isMouseCloseToEdges(managedRectangles, x, y)
     setDragStart({ x, y })
-    if (isWithinExistingRect.length > 0) {
+    if (isCloseToEdges.length > 0) {
+      setResizing(isCloseToEdges[0])
+      setCurrentRect({ ...isCloseToEdges[0] })
+    } else if (isWithinExistingRect.length > 0) {
       setMoving(true)
       setCurrentRect({ ...isWithinExistingRect[0] })
     } else {
@@ -116,20 +91,68 @@ function App() {
 
   const onMouseUp = (e) => {
     e.preventDefault()
+    e.stopPropagation()
     setDragging(false)
     setMoving(false)
-    setManagedRectangles([
-      ...managedRectangles,
-      { ...rectangleBeingDrawn.current, current: false },
-    ])
+    setResizing(false)
+    if (rectangleBeingDrawn.current?.width) {
+      setManagedRectangles([
+        ...managedRectangles,
+        { ...rectangleBeingDrawn.current, current: false, id: uuid() },
+      ])
+    }
     rectangleBeingDrawn.current = null
   }
 
   const onMouseMove = (e) => {
     e.preventDefault()
+    e.stopPropagation()
+    if (resizing) {
+      const { direction, rect } = resizing
+      setManagedRectangles(managedRectangles.filter((r) => r.id !== rect.id))
+      clearCanvas()
+
+      const { x: canvasX, y: canvasY } = getCanvasSize()
+      const x = e.clientX - canvasX
+      const y = e.clientY - canvasY
+
+      if (direction === "bottomRight") {
+        const rectangle = {
+          ...rect,
+          width: rect.width - (dragStart.x - x),
+          height: rect.height - (dragStart.y - y),
+        }
+        rectangleBeingDrawn.current = rectangle
+      } else if (direction === "bottomLeft") {
+        const rectangle = {
+          ...rect,
+          x,
+          width: rect.x + (dragStart.x - x),
+          height: rect.height - (dragStart.y - y),
+        }
+        rectangleBeingDrawn.current = rectangle
+      } else if (direction === "topLeft") {
+        const rectangle = {
+          ...rect,
+          x,
+          y,
+          width: rect.x + (dragStart.x - x),
+          height: rect.y + (dragStart.y - y),
+        }
+        rectangleBeingDrawn.current = rectangle
+      } else {
+        const rectangle = {
+          ...rect,
+          y,
+          width: rect.x - (dragStart.x - x),
+          height: rect.height + (dragStart.y - y),
+        }
+        rectangleBeingDrawn.current = rectangle
+      }
+    }
     if (moving) {
       setManagedRectangles(
-        managedRectangles.filter((rect) => rect.x !== currentRect.x)
+        managedRectangles.filter((rect) => rect.id !== currentRect.id)
       )
       const { x: canvasX, y: canvasY } = getCanvasSize()
       const x = e.clientX - canvasX - dragStart.x
@@ -149,8 +172,8 @@ function App() {
       const { x: canvasX, y: canvasY } = getCanvasSize()
       const x = e.clientX - canvasX
       const y = e.clientY - canvasY
-      const width = Math.abs(dragStart.x - x) / canvasWidth
-      const height = Math.abs(dragStart.y - y) / canvasHeight
+      const width = Math.abs(dragStart.x - x)
+      const height = Math.abs(dragStart.y - y)
       const color = drawColor
       const rectangle = {
         x: dragStart.x,
@@ -168,7 +191,7 @@ function App() {
 
   const onDeleteRect = useCallback(() => {
     setManagedRectangles(
-      managedRectangles.filter((rect) => rect.x !== currentRect.x)
+      managedRectangles.filter((rect) => rect.id !== currentRect.id)
     )
     setCurrentRect(null)
   }, [managedRectangles, setManagedRectangles, currentRect])
@@ -180,7 +203,7 @@ function App() {
       if (currentRect) {
         setManagedRectangles(
           managedRectangles.map((rect) =>
-            rect.x === currentRect.x ? { ...currentRect, color } : rect
+            rect.id === currentRect.id ? { ...currentRect, color } : rect
           )
         )
       }
