@@ -246,7 +246,7 @@ function App() {
           </button>
         </div>
         <canvas
-          style={{ border: "1px solid black" }}
+          style={{ border: "1px solid black", touchAction: 'none' }}
           height={canvasHeight}
           width={canvasWidth}
           onPointerDown={onMouseDown}
