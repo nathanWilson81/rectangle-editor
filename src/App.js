@@ -7,7 +7,7 @@ const canvasHeight = window.innerHeight * 0.8
 const canvasWidth = window.innerWidth * 0.8
 
 const rectanglesOnMount = [
-  { x: 5, y: 5, width: 0.3, height: 0.2, color: "red" },
+  { x: 5, y: 5, width: 0.3, height: 0.2, color: "red", current: false },
 ]
 
 const getCanvasContext = () => {
@@ -59,7 +59,7 @@ function App() {
   const [currentRect, setCurrentRect] = useState(null)
   const rectangleBeingDrawn = useRef(null)
 
-  const drawRectangle = useCallback(({ x, y, width, height, color }) => {
+  const drawRectangle = useCallback(({ x, y, width, height, color, current }) => {
     const ctx = getCanvasContext()
     const { canvasWidth, canvasHeight } = getCanvasSize()
     const actualWidth = canvasWidth * width
@@ -68,6 +68,13 @@ function App() {
     ctx.fillStyle = color
     ctx.rect(x, y, actualWidth, actualHeight)
     ctx.fill()
+    if (current) {
+      ctx.beginPath();
+      ctx.lineWidth = "2";
+      ctx.strokeStyle = "green";
+      ctx.rect(x, y, actualWidth, actualHeight);
+      ctx.stroke();
+    }
   }, [])
 
   const drawRectangles = () => {
@@ -105,9 +112,11 @@ function App() {
     setMoving(false)
     setManagedRectangles([
       ...managedRectangles,
-      { ...rectangleBeingDrawn.current },
+      { ...rectangleBeingDrawn.current, current: false },
     ])
     rectangleBeingDrawn.current = null
+    clearCanvas()
+    drawRectangles()
   }
 
   const onMouseMove = (e) => {
@@ -119,7 +128,7 @@ function App() {
       const x = (e.clientX - canvasX) - dragStart.x
       const y = e.clientY - canvasY - dragStart.y
       const { width, height, color } = currentRect
-      const rectangle = { x: dragStart.x + x, y: dragStart.y + y, width, height, color }
+      const rectangle = { x: dragStart.x + x, y: dragStart.y + y, width, height, color, current: true }
       clearCanvas()
       drawRectangles()
       drawRectangle(rectangle)
@@ -137,7 +146,7 @@ function App() {
       const width = Math.abs(dragStart.x - x) / canvasWidth
       const height = Math.abs(dragStart.y - y) / canvasHeight
       const color = "red"
-      const rectangle = { x: dragStart.x, y: dragStart.y, width, height, color }
+      const rectangle = { x: dragStart.x, y: dragStart.y, width, height, color, current: true }
       if (width > 0 && height > 0) {
         clearCanvas()
         drawRectangles()
