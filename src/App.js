@@ -94,7 +94,10 @@ function App() {
 
   const onMouseUp = (e) => {
     setDragging(false)
-    setManagedRectangles([...managedRectangles, {...rectangleBeingDrawn.current}])
+    setManagedRectangles([
+      ...managedRectangles,
+      { ...rectangleBeingDrawn.current },
+    ])
     rectangleBeingDrawn.current = null
   }
 
