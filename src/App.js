@@ -3,6 +3,7 @@ import "./App.css"
 import { useEffect, useState, useCallback, useRef } from "react"
 
 import { Trash2, XCircle, Archive } from "feather-icons-react"
+import LayoutModal from "./LayoutModal"
 
 const canvasId = "rectangle-editor"
 
@@ -25,6 +26,7 @@ function App() {
   const [dragging, setDragging] = useState(false)
   const [managedRectangles, setManagedRectangles] = useState(rectanglesOnMount)
   const [moving, setMoving] = useState(false)
+  const [layoutModalOpen, setLayoutModalOpen] = useState(false)
   const [currentRect, setCurrentRect] = useState(null)
   const [canvasHeight, setCanvasHeight] = useState(window.innerHeight * 0.8)
   const [canvasWidth, setCanvasWidth] = useState(window.innerWidth * 0.8)
@@ -222,16 +224,23 @@ function App() {
 
   return (
     <div
+      className="App"
       style={{
         height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        overflow: 'hidden'
+        overflow: "hidden",
       }}
-      className="App"
     >
+      {layoutModalOpen && (
+        <LayoutModal
+          setLayoutModalOpen={setLayoutModalOpen}
+          managedRectangles={managedRectangles}
+          setManagedRectangles={setManagedRectangles}
+        />
+      )}
       <div>
         <div style={{ display: "flex" }}>
           <button disabled={!currentRect} onClick={onDeleteRect}>
@@ -241,12 +250,12 @@ function App() {
             <XCircle />
           </button>
           <input type="color" value={drawColor} onChange={onColorChange} />
-          <button>
+          <button onClick={() => setLayoutModalOpen(true)}>
             <Archive />
           </button>
         </div>
         <canvas
-          style={{ border: "1px solid black", touchAction: 'none' }}
+          style={{ border: "1px solid black", touchAction: "none" }}
           height={canvasHeight}
           width={canvasWidth}
           onPointerDown={onMouseDown}
