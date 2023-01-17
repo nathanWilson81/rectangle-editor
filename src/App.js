@@ -2,7 +2,7 @@ import "./App.css"
 
 import { useEffect, useState, useCallback, useRef } from "react"
 
-import { Trash2, XCircle } from "feather-icons-react"
+import { Trash2, XCircle, Archive } from "feather-icons-react"
 
 const canvasId = "rectangle-editor"
 
@@ -28,7 +28,7 @@ function App() {
   const [currentRect, setCurrentRect] = useState(null)
   const [canvasHeight, setCanvasHeight] = useState(window.innerHeight * 0.8)
   const [canvasWidth, setCanvasWidth] = useState(window.innerWidth * 0.8)
-  const [drawColor, setDrawColor] = useState("ff0000")
+  const [drawColor, setDrawColor] = useState("#ff0000")
   const rectangleBeingDrawn = useRef(null)
   const resizeRef = useRef(null)
   const renderRef = useRef(null)
@@ -188,6 +188,10 @@ function App() {
   }, [setManagedRectangles])
 
   useEffect(() => {
+    setupCanvas()
+  }, [])
+
+  useEffect(() => {
     resizeRef.current = window.addEventListener("resize", () => {
       setCanvasWidth(window.innerWidth * 0.8)
       setCanvasHeight(window.innerHeight * 0.8)
@@ -196,10 +200,6 @@ function App() {
     return () => {
       window.removeEventListener("resize", resizeRef.current)
     }
-  }, [])
-
-  useEffect(() => {
-    setupCanvas()
   }, [])
 
   useEffect(() => {
@@ -225,6 +225,7 @@ function App() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        overflow: 'hidden'
       }}
       className="App"
     >
@@ -237,6 +238,9 @@ function App() {
             <XCircle />
           </button>
           <input type="color" value={drawColor} onChange={onColorChange} />
+          <button>
+            <Archive />
+          </button>
         </div>
         <canvas
           style={{ border: "1px solid black" }}
