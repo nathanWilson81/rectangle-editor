@@ -2,7 +2,7 @@ import "./App.css"
 
 import { useEffect, useState, useCallback, useRef } from "react"
 
-import { Trash2 } from "feather-icons-react"
+import { Trash2, XCircle } from "feather-icons-react"
 
 const canvasId = "rectangle-editor"
 
@@ -171,7 +171,6 @@ function App() {
   const onColorChange = useCallback(
     (e) => {
       const color = e.target.value
-      console.log(color)
       setDrawColor(color)
       if (currentRect) {
         setManagedRectangles(
@@ -183,6 +182,10 @@ function App() {
     },
     [currentRect, managedRectangles, setManagedRectangles]
   )
+
+  const onClearBoard = useCallback(() => {
+    setManagedRectangles([])
+  }, [setManagedRectangles])
 
   useEffect(() => {
     resizeRef.current = window.addEventListener("resize", () => {
@@ -229,6 +232,9 @@ function App() {
         <div style={{ display: "flex" }}>
           <button disabled={!currentRect} onClick={onDeleteRect}>
             <Trash2 />
+          </button>
+          <button onClick={onClearBoard}>
+            <XCircle />
           </button>
           <input type="color" value={drawColor} onChange={onColorChange} />
         </div>
