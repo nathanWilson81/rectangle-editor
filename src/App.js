@@ -93,6 +93,7 @@ function App() {
   }, [canvasHeight, canvasWidth])
 
   const onMouseDown = (e) => {
+    e.preventDefault()
     const { x: canvasX, y: canvasY } = getCanvasSize()
     const x = e.clientX - canvasX
     const y = e.clientY - canvasY
@@ -111,7 +112,8 @@ function App() {
     }
   }
 
-  const onMouseUp = () => {
+  const onMouseUp = (e) => {
+    e.preventDefault()
     setDragging(false)
     setMoving(false)
     setManagedRectangles([
@@ -122,6 +124,7 @@ function App() {
   }
 
   const onMouseMove = (e) => {
+    e.preventDefault()
     if (moving) {
       setManagedRectangles(
         managedRectangles.filter((rect) => rect.x !== currentRect.x)
