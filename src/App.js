@@ -2,7 +2,7 @@ import "./App.css"
 
 import { useEffect, useState, useCallback, useRef } from "react"
 
-import { Trash2, XCircle, Archive } from "feather-icons-react"
+import { Trash2, XCircle, Archive, Info } from "feather-icons-react"
 import { v4 as uuid } from "uuid"
 import {
   isMouseWithinExistingRect,
@@ -12,6 +12,7 @@ import {
 } from "./utils"
 
 import LayoutModal from "./LayoutModal"
+import InfoModal from "./InfoModal"
 
 const getCanvasContext = () => {
   const canvas = document.getElementById(canvasId)
@@ -25,6 +26,7 @@ const setupCanvas = () => {
 
 const ButtonStyles = {
   marginRight: "1rem",
+  height: '48px'
 }
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
   const [moving, setMoving] = useState(false)
   const [resizing, setResizing] = useState(false)
   const [layoutModalOpen, setLayoutModalOpen] = useState(false)
+  const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [managedRectangles, setManagedRectangles] = useState([])
   const [currentRect, setCurrentRect] = useState(null)
   const [canvasHeight, setCanvasHeight] = useState(window.innerHeight * 0.8)
@@ -226,6 +229,7 @@ function App() {
           )
         )
       }
+      document.body.style.zoom = "100%"
     },
     [currentRect, managedRectangles, setManagedRectangles]
   )
@@ -283,8 +287,16 @@ function App() {
           setManagedRectangles={setManagedRectangles}
         />
       )}
+      {infoModalOpen && (
+        <InfoModal
+          setInfoModalOpen={setInfoModalOpen}
+        />
+      )}
       <div>
         <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
+          <button style={ButtonStyles} onClick={() => setInfoModalOpen(true)}>
+            <Info />
+          </button>
           <button
             style={ButtonStyles}
             disabled={!currentRect}
