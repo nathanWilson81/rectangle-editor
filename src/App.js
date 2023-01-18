@@ -26,7 +26,7 @@ const setupCanvas = () => {
 
 const ButtonStyles = {
   marginRight: "1rem",
-  height: '48px'
+  height: "48px",
 }
 
 function App() {
@@ -229,7 +229,6 @@ function App() {
           )
         )
       }
-      document.body.style.zoom = "100%"
     },
     [currentRect, managedRectangles, setManagedRectangles]
   )
@@ -287,13 +286,17 @@ function App() {
           setManagedRectangles={setManagedRectangles}
         />
       )}
-      {infoModalOpen && (
-        <InfoModal
-          setInfoModalOpen={setInfoModalOpen}
-        />
-      )}
+      {infoModalOpen && <InfoModal setInfoModalOpen={setInfoModalOpen} />}
       <div>
-        <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <button style={ButtonStyles} onClick={() => setInfoModalOpen(true)}>
             <Info />
           </button>

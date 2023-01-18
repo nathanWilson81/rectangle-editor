@@ -1,8 +1,6 @@
 import { createPortal } from "react-dom"
 
-export const InfoModal = ({
-  setInfoModalOpen,
-}) => {
+export const InfoModal = ({ setInfoModalOpen }) => {
   return createPortal(
     <div
       style={{
@@ -31,18 +29,13 @@ export const InfoModal = ({
       >
         <h1>Information</h1>
         <ul>
+          <li>Made using Canvas</li>
+          <li>Draw squares using your mouse or touch</li>
           <li>
-            Made using Canvas
+            Drag the squares around by clicking near the center of the square
+            and dragging
           </li>
-          <li>
-            Draw squares using your mouse or touch
-          </li>
-          <li>
-            Drag the squares around by clicking near the center of the square and dragging
-          </li>
-          <li>
-            To resize a square, drag near the edges
-          </li>
+          <li>To resize a square, drag near the edges</li>
         </ul>
       </div>
     </div>,
