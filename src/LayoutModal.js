@@ -6,7 +6,10 @@ const localStorageKey = "rectangle-editor-layouts"
 
 const modalItemStyles = {
   display: "flex",
+  width: "100%",
   flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
 }
 
 export const LayoutModal = ({
@@ -58,8 +61,9 @@ export const LayoutModal = ({
       const currentItems = getItems()
       const layoutToLoad = currentItems.find((item) => item.name === layoutName)
       setManagedRectangles(layoutToLoad.items)
+      setLayoutModalOpen(false)
     },
-    [setManagedRectangles, getItems]
+    [setManagedRectangles, getItems, setLayoutModalOpen]
   )
 
   const deleteLayout = useCallback(
@@ -95,7 +99,6 @@ export const LayoutModal = ({
     >
       <div
         style={{
-          height: "50%",
           width: "50%",
           background: "white",
           borderRadius: "1rem",
@@ -104,35 +107,47 @@ export const LayoutModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         <h1>Layout Management</h1>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", padding: "2rem" }}
+        >
           <div style={modalItemStyles}>
-            <p>Rename current Layout: </p>
+            <p>Name current Layout: </p>
             <input
+              style={{ width: "50%" }}
               value={currentLayoutName}
+              placeholder="Reuse the same name to override"
               onChange={(e) => setCurrentLayoutName(e.target.value)}
             />
           </div>
           <div style={modalItemStyles}>
             <p>Save current Layout: </p>
-            <Save onClick={saveLayout} />
+            <button>
+              <Save onClick={saveLayout} />
+            </button>
           </div>
           <div style={modalItemStyles}>
             <p>Load Layout: </p>
-            <select onChange={selectLayout}>
+            <select style={{ width: "50%" }} onChange={selectLayout}>
               {layouts?.map((layout) => (
-                <option key={layout.name} value={layout.name}>
-                  {layout.name}
-                </option>
+                <>
+                  <option style={{ display: "none" }} key="empty" label="" />
+                  <option key={layout.name} value={layout.name}>
+                    {layout.name}
+                  </option>
+                </>
               ))}
             </select>
           </div>
           <div style={modalItemStyles}>
             <p>Delete Layout: </p>
-            <select onChange={deleteLayout}>
+            <select style={{ width: "50%" }} onChange={deleteLayout}>
               {layouts?.map((layout) => (
-                <option key={layout.name} value={layout.name}>
-                  {layout.name}
-                </option>
+                <>
+                  <option style={{ display: "none" }} key="empty" label="" />
+                  <option key={layout.name} value={layout.name}>
+                    {layout.name}
+                  </option>
+                </>
               ))}
             </select>
           </div>
