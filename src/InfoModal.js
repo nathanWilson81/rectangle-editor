@@ -36,6 +36,7 @@ export const InfoModal = ({ setInfoModalOpen }) => {
             and dragging
           </li>
           <li>To resize a square, drag near the edges</li>
+          <li>Clicking a square will let you change it's color or delete it</li>
         </ul>
       </div>
     </div>,

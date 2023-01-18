@@ -121,8 +121,8 @@ export const LayoutModal = ({
           </div>
           <div style={modalItemStyles}>
             <p>Save current Layout: </p>
-            <button>
-              <Save onClick={saveLayout} />
+            <button disabled={!currentLayoutName} onClick={saveLayout}>
+              <Save />
             </button>
           </div>
           <div style={modalItemStyles}>

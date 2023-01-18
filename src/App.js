@@ -319,7 +319,11 @@ function App() {
           <input type="color" value={drawColor} onChange={onColorChange} />
         </div>
         <canvas
-          style={{ border: "1px solid black", touchAction: "none" }}
+          style={{
+            border: "2px solid black",
+            borderRadius: "1rem",
+            touchAction: "none",
+          }}
           height={canvasHeight}
           width={canvasWidth}
           onPointerDown={onMouseDown}
